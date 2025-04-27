@@ -54,6 +54,10 @@ const MeetingTypeList = () => {
       });
       setCallDetail(call);
       if (!values.description) {
+        if (!call.id) {
+          toast({ title: 'Không tìm thấy meeting ID' });
+          return;
+        }
         router.push(`/meeting/${call.id}`);
       }
       toast({
@@ -67,7 +71,9 @@ const MeetingTypeList = () => {
 
   if (!client || !user) return <Loader />;
 
-  const meetingLink = `${process.env.NEXT_PUBLIC_BASE_URL}/meeting/${callDetail?.id}`;
+  const meetingLink = callDetail?.id
+  ? `/meeting/${callDetail.id}`
+  : '';
 
   return (
     <section className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -155,7 +161,13 @@ const MeetingTypeList = () => {
         title="Nhập đường link"
         className="text-center"
         buttonText="Tham gia cuộc họp"
-        handleClick={() => router.push(values.link)}
+        handleClick={() => {
+          if (!values.link || !values.link.startsWith('/meeting/')) {
+            toast({ title: 'Link không hợp lệ. Vui lòng nhập đúng link họp!' });
+            return;
+          }
+          router.push(values.link);
+        }}
       >
         <Input
           placeholder="Đường link"
